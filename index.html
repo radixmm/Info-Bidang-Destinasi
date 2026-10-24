@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Info Bidang Destinasi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+html,body{margin:0}
+/* Layout: kolom tunggal berbaris kartu; agenda di atas, kalender di bawah. Gelap lebih dulu. */
+:root {
+  --bg: #0e1513; --panel: #151f1c; --line: #24332e; --fg: #e4ece8; --muted: #8fa39b; --grid: #1e2a26;
+  --accent: #4fc3a1; --accent2: #e3a857; --muted-bar: #3a4b45; --ok: #5bc98f; --warn: #e8b04f; --bad: #ef7a6a;
+  --c1: #4fc3a1; --c2: #e3a857; --c3: #7aa7e0; --c4: #8a9b95;
+  --sans: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #f4f6f5; --panel: #ffffff; --line: #d9e2de; --fg: #14211d; --muted: #5a6d66; --grid: #e8eeeb;
+  --accent: #13866a; --accent2: #b36b12; --muted-bar: #c3cfca; --ok: #1d8a57; --warn: #a8650b; --bad: #c23c30;
+  --c1: #13866a; --c2: #b36b12; --c3: #2f63a8; --c4: #7d8c86; color-scheme: light; } }
+:root[data-theme="light"] {
+  --bg: #f4f6f5; --panel: #ffffff; --line: #d9e2de; --fg: #14211d; --muted: #5a6d66; --grid: #e8eeeb;
+  --accent: #13866a; --accent2: #b36b12; --muted-bar: #c3cfca; --ok: #1d8a57; --warn: #a8650b; --bad: #c23c30;
+  --c1: #13866a; --c2: #b36b12; --c3: #2f63a8; --c4: #7d8c86; color-scheme: light; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 24px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+.head h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(26px, 5vw, 36px); margin: 0 0 4px; text-wrap: balance; }
+.eyebrow { font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.head p { margin: 0; color: var(--muted); }
+.row { display: grid; gap: 16px; }
+.r3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+.r2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.ch { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.open { font-size: 12px; color: var(--fg); text-decoration: none; white-space: nowrap; border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; flex: none; }
+.open:hover, .open:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.card h2 { font-size: 15px; font-weight: 600; margin: 0; text-wrap: balance; }
+.card h2 small { display: block; font-size: 12px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 10px; }
+.k { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.k .l { font-size: 12px; color: var(--muted); }
+.k .v { font-family: var(--serif); font-size: 28px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.k .n { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.up { color: var(--ok); } .down { color: var(--bad); } .warn { color: var(--warn); }
+.note { font-size: 12px; color: var(--muted); margin: 0; }
+.stack { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--grid); }
+.stack i { display: block; height: 100%; }
+.leg { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
+.leg span { display: inline-flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; }
+.leg b { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+.bars { display: grid; gap: 6px; }
+.bar { display: grid; grid-template-columns: minmax(5.5rem, 8rem) 1fr auto; align-items: center; gap: 8px; font-size: 12px; }
+.bar .t { height: 8px; background: var(--grid); border-radius: 4px; overflow: hidden; }
+.bar .t i { display: block; height: 100%; border-radius: 4px; }
+.bar .r { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 18px; }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart text { fill: var(--muted); font-size: 10px; font-family: var(--sans); }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.25); padding: 6px 8px; font-size: 12px; white-space: nowrap; z-index: 2; }
+.tip .h { color: var(--muted); }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.li { display: grid; grid-template-columns: 3.4rem 1fr; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); }
+.li:first-child { border-top: 0; }
+.dt { text-align: center; border-radius: 8px; background: var(--grid); padding: 4px 0; font-variant-numeric: tabular-nums; height: max-content; }
+.dt .d { font-family: var(--serif); font-size: 17px; line-height: 1.1; }
+.dt .m { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.dt.now { outline: 2px solid var(--ok); }
+.li.done { opacity: .6; }
+.li .tt { overflow-wrap: anywhere; }
+.li .mt { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 2px; }
+.pill { border: 1px solid var(--line); border-radius: 999px; padding: 0 7px; color: var(--fg); }
+.pill.now { color: var(--ok); border-color: currentColor; }
+.foot { font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 4px; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow">Disbudpar Provinsi Jawa Timur · Bidang Destinasi Pariwisata</div>
+    <h1>Info Bidang Destinasi</h1>
+    <p id="stamp"></p>
+  </header>
+
+  <section class="card" id="agenda">
+    <div class="ch"><h2>Agenda Bidang Destinasi<small>Agenda hari ini dan besok, dari rekap disposisi dan surat masuk</small></h2></div>
+    <div class="split">
+      <div class="kpis">
+        <div class="k"><span class="l">Hari ini</span><span class="v" id="ag-hari"></span></div>
+        <div class="k"><span class="l">7 hari ke depan</span><span class="v" id="ag-pekan"></span></div>
+        <div class="k"><span class="l">Mendatang</span><span class="v" id="ag-up"></span><span class="n" id="ag-nopic"></span></div>
+        <div class="k"><span class="l">Total tercatat</span><span class="v" id="ag-tot"></span></div>
+      </div>
+      <div><p class="note" style="margin-bottom:6px">Agenda per bulan pelaksanaan</p><div class="chart" id="ag-chart"></div></div>
+    </div>
+    <div class="split" style="border-top:1px solid var(--line);padding-top:14px">
+      <div style="min-width:0"><p class="note" style="margin-bottom:6px" id="ag-h1">Hari ini</p><ul class="list" id="ag-l1"></ul></div>
+      <div style="min-width:0"><p class="note" style="margin-bottom:6px" id="ag-h2">Besok</p><ul class="list" id="ag-l2"></ul></div>
+    </div>
+  </section>
+
+  <section class="card" id="geopark">
+    <div class="ch"><h2>Progres Geopark Jawa Timur<small>Status pengembangan geopark per kabupaten</small></h2></div>
+    <div class="split">
+      <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div class="kpis">
+          <div class="k"><span class="l">UNESCO UGGp</span><span class="v" id="gp-uggp"></span></div>
+          <div class="k"><span class="l">Kabupaten dalam proses</span><span class="v" id="gp-proses"></span></div>
+        </div>
+        <div class="bars" id="gp-tahap"></div>
+      </div>
+      <div style="min-width:0"><p class="note" style="margin-bottom:6px">Update terbaru</p><ul class="list" id="gp-list"></ul></div>
+    </div>
+  </section>
+
+  <div class="row r3">
+    <section class="card" id="ipkn">
+      <div class="ch"><h2>IPKN Jawa Timur 2026<small>Indeks Pembangunan Kepariwisataan Nasional</small></h2></div>
+      <div class="kpis">
+        <div class="k"><span class="l">Skor IPKN 2026</span><span class="v" id="ip-skor"></span><span class="n" id="ip-skor24"></span></div>
+        <div class="k"><span class="l">Peringkat nasional</span><span class="v" id="ip-rank"></span><span class="n" id="ip-n"></span></div>
+      </div>
+      <div class="bars" id="ip-traj"></div>
+      <p class="note" id="ip-kelas"></p>
+    </section>
+    <section class="card" id="imti">
+      <div class="ch"><h2>IMTI 2026 Jawa Timur<small>Indonesia Muslim Travel Index</small></h2></div>
+      <div class="kpis">
+        <div class="k"><span class="l">Skor IMTI</span><span class="v" id="im-skor"></span><span class="n" id="im-chg"></span></div>
+        <div class="k"><span class="l">Peringkat</span><span class="v" id="im-rank"></span><span class="n" id="im-rank25"></span></div>
+      </div>
+      <div class="bars" id="im-aces"></div>
+    </section>
+    <section class="card" id="capaian">
+      <div class="ch"><h2>Capaian Desa Wisata Jatim<small>Rekap capaian dan penghargaan</small></h2></div>
+      <div class="kpis">
+        <div class="k"><span class="l">Desa berprestasi</span><span class="v" id="cp-pr"></span><span class="n" id="cp-tot"></span></div>
+        <div class="k"><span class="l">Maju + Mandiri</span><span class="v" id="cp-mm"></span></div>
+        <div class="k"><span class="l">Penghargaan ADWI</span><span class="v" id="cp-adwi"></span></div>
+        <div class="k"><span class="l">15 Besar WIA 2026</span><span class="v" id="cp-wia"></span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="row r2">
+    <section class="card" id="kunjungan">
+      <div class="ch"><h2>Kunjungan Wisatawan 2026<small>Kunjungan ke daya tarik wisata yang dilaporkan kabupaten/kota</small></h2></div>
+      <div class="kpis">
+        <div class="k"><span class="l" id="kj-l1">Wisnus 2026</span><span class="v" id="kj-wn"></span></div>
+        <div class="k"><span class="l">Wisman 2026</span><span class="v" id="kj-wm"></span></div>
+        <div class="k"><span class="l">Wisnus vs 2025</span><span class="v" id="kj-g"></span><span class="n" id="kj-gn"></span></div>
+      </div>
+      <div class="chart" id="kj-chart"></div>
+      <div class="leg"><span><b style="background:var(--c1)"></b>Wisnus 2026, bulan lengkap</span><span><b style="background:var(--muted-bar)"></b>2026, laporan belum lengkap</span><span><b style="background:var(--c2);border-radius:50%"></b>Wisnus 2025</span></div>
+      <p class="note">Angka sementara: laporan kabupaten/kota untuk bulan-bulan terakhir belum lengkap.</p>
+    </section>
+    <section class="card" id="dtw">
+      <div class="ch"><h2>Daya Tarik Wisata Jawa Timur 2025<small>Inventaris daya tarik wisata (DTW)</small></h2></div>
+      <div class="kpis">
+        <div class="k"><span class="l">DTW terdata</span><span class="v" id="dt-n"></span><span class="n" id="dt-kab"></span></div>
+        <div class="k"><span class="l">Status aktif</span><span class="v" id="dt-aktif"></span></div>
+        <div class="k"><span class="l">Sudah berizin</span><span class="v" id="dt-izin"></span></div>
+        <div class="k"><span class="l">Rating Gmaps rata-rata</span><span class="v" id="dt-rt"></span></div>
+      </div>
+      <div class="bars" id="dt-kat"></div>
+    </section>
+  </div>
+
+  <div class="row r2">
+    <section class="card" id="dw2025">
+      <div class="ch"><h2>Desa Wisata Jawa Timur 2025<small>Data desa wisata tahun 2025</small></h2></div>
+      <div class="kpis">
+        <div class="k"><span class="l">Total desa wisata</span><span class="v" id="d5-tot"></span></div>
+        <div class="k"><span class="l">Aktif</span><span class="v" id="d5-aktif"></span></div>
+        <div class="k"><span class="l">Tutup sementara</span><span class="v" id="d5-tutup"></span></div>
+      </div>
+      <div><p class="note" style="margin-bottom:6px">Klasifikasi</p><div class="stack" id="d5-stack"></div><div class="leg" id="d5-leg" style="margin-top:6px"></div></div>
+      <p class="note" id="d5-eko"></p>
+    </section>
+    <section class="card" id="dw2026">
+      <div class="ch"><h2>Desa Wisata Jawa Timur 2026<small>Database desa wisata terkini</small></h2></div>
+      <div class="kpis">
+        <div class="k"><span class="l">Total desa wisata</span><span class="v" id="d6-tot"></span></div>
+        <div class="k"><span class="l">Aktif</span><span class="v" id="d6-aktif"></span></div>
+        <div class="k"><span class="l">Tutup sementara</span><span class="v" id="d6-ts"></span></div>
+        <div class="k"><span class="l">Tutup permanen</span><span class="v" id="d6-tp"></span></div>
+      </div>
+      <div><p class="note" style="margin-bottom:6px">Klasifikasi</p><div class="stack" id="d6-stack"></div><div class="leg" id="d6-leg" style="margin-top:6px"></div></div>
+    </section>
+  </div>
+
+  <section class="card" id="kalender">
+    <div class="ch"><h2>Kalender Wisata Jatim 2026<small>Rekonfirmasi event dan Karisma Event Nusantara (KEN)</small></h2></div>
+    <div class="split">
+      <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div class="kpis">
+          <div class="k"><span class="l">Event masuk Kalwis</span><span class="v" id="kw-masuk"></span></div>
+          <div class="k"><span class="l">Update event (setahun)</span><span class="v" id="kw-upd"></span></div>
+          <div class="k"><span class="l">Event KEN 2026</span><span class="v" id="kw-ken"></span><span class="n" id="kw-st"></span></div>
+        </div>
+        <div class="chart" id="kw-chart"></div>
+        <div class="leg"><span><b style="background:var(--muted-bar)"></b>Update event per bulan</span><span><b style="background:var(--c1)"></b>Masuk Kalwis</span></div>
+      </div>
+      <div style="min-width:0"><p class="note" style="margin-bottom:6px">Karisma Event Nusantara 2026 di Jawa Timur</p><ul class="list" id="kw-list"></ul></div>
+    </div>
+  </section>
+
+  <section class="card" id="tim">
+    <div class="ch"><h2>Tim Bidang Destinasi<small>Komposisi pegawai dan ulang tahun terdekat</small></h2></div>
+    <div class="split">
+      <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+        <div class="kpis">
+          <div class="k"><span class="l">Jumlah pegawai</span><span class="v" id="tm-n"></span></div>
+          <div class="k"><span class="l">Laki-laki / Perempuan</span><span class="v" id="tm-lp"></span></div>
+          <div class="k"><span class="l">Ulang tahun bulan ini</span><span class="v" id="tm-ultah"></span><span class="n" id="tm-ultah-n"></span></div>
+        </div>
+        <div><p class="note" style="margin-bottom:6px">Status kepegawaian</p><div class="bars" id="tm-status"></div></div>
+      </div>
+      <div style="min-width:0"><p class="note" style="margin-bottom:6px">Ulang tahun terdekat</p><ul class="list" id="tm-list"></ul></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span id="foot-upd"></span>
+    <span>Sumber: rekap internal Bidang Destinasi Pariwisata Disbudpar Jatim; IPKN 2026 (Kemenpar/BRIN); IMTI 2026 (Kemenpar, BI, CrescentRating). Angka 2026 bersifat sementara.</span>
+  </footer>
+</div>
+
+<script>
+const D = {"tim": [["Evy Afianasari, S.T., M.M.A.", 1, 14, "Perempuan", "PNS", "Kepala Dinas Kebudayaan dan Pariwisata Provinsi Jawa Timur"], ["Radix Mulya Mahardika, S.E", 8, 15, "Laki-laki", "PNS", "Kepala Bidang Destinasi Pariwisata"], ["Wawan Darmawan, SE., M.M.", 3, 18, "Laki-laki", "PNS", "Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Madya"], ["Dyah Sukma Novianti, SE., M.Sn.", 11, 4, "Perempuan", "PNS", "Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Muda"], ["Kateno, SE", 7, 5, "Laki-laki", "PNS", "Pengolah Data dan Informasi"], ["Tri Handayani, SE", 2, 22, "Perempuan", "PNS", "Pengolah Data dan Informasi"], ["Charel Yogie Adiyarto, SE", 6, 13, "Laki-laki", "PNS", "Pengolah Data dan Informasi"], ["Mikhael Yohan Ariel, S.Par", 11, 7, "Laki-laki", "PNS", "Penelaah Teknis Kebijakan"], ["Devin Cahya Triansya, S.Par", 3, 5, "Laki-laki", "PNS", "Penelaah Teknis Kebijakan"], ["Yunita Hardiyanti Putri, S.Par", 6, 26, "Perempuan", "PNS", "Penelaah Teknis Kebijakan"], ["Tiara Hikmata Billah, S.P.W.K.", 5, 25, "Perempuan", "PNS", "Adyatama Kepariwisataan dan Ekonomi Kreatif Ahli Pertama"], ["Faradiba Rahmalia, SM", 7, 22, "Perempuan", "PNS", "Fasilitator Pemerintahan"], ["Prima Kirtti Utomo Yusuf, S.I.Kom", 4, 7, "Laki-laki", "PPPK", "Pranata Humas Ahli Pertama"], ["Arif Khoirul Anam, S.Stat.", 5, 27, "Laki-laki", "PPPK", "Statistisi Ahli Pertama"], ["Rachma Kartika Putri, SE", 8, 27, "Perempuan", "PPPK", "Penata Layanan Operasional"], ["Hatoga, S.Tp", 7, 13, "Laki-laki", "PPPK-PW", "Penata Layanan Operasional"], ["Dyah Pramesti Wardhanaputri, SH", 12, 16, "Perempuan", "PPPK-PW", "Penata Layanan Operasional"], ["Agung Mahardika, SE., M.Psi.", 9, 14, "Laki-laki", "PPPK-PW", "Penata Layanan Operasional"], ["Siti Khamilah, S.Sos", 1, 12, "Perempuan", "PPPK-PW", "Penata Layanan Operasional"]], "geopark": {"tahap": [["UNESCO UGGp", 2], ["Aspiring UGGp", 1], ["Menuju Geopark Nasional", 1], ["Aspiring Geopark Nasional", 5], ["Proses dokumen", 1], ["Pengajuan lisan", 5]], "update": [["Gunung Sewu UGGp", "Pra-Revalidasi III", "24–27 Oktober 2026", "2026-10-24", "2026-10-27"], ["Ijen UGGp", "Revalidasi I selesai, menunggu hasil penilaian UNESCO", "2–6 Agustus 2026", "2026-08-02", "2026-08-06"], ["Bojonegoro (Aspiring UGGp)", "Validasi lapangan selesai, menunggu keputusan UNESCO", "26–31 Juli 2026", "2026-07-26", "2026-07-31"], ["Kab. Situbondo", "Sepakat bergabung ke Ijen UGGp", "1 September 2026", "2026-09-01", "2026-09-01"]]}, "ipkn": {"skor_2026": 4.698, "skor_2024": 4.478, "rank_2022": 6, "rank_2024": 6, "rank_2026": 3, "n": 38, "kelas": "Berdaya Saing Sangat Tinggi", "jarak": 0.599}, "imti": {"skor": 66.23, "peringkat": 5, "peringkat_2025": 7, "perubahan": 1.8, "n": 15, "pilar": [["Access", 77.6, 2], ["Communication", 60.3, 7], ["Environment", 64.8, 9], ["Services", 67.4, 5]]}, "capaian": {"total": 734, "berprestasi": 141, "maju_mandiri": 80, "adwi": 45, "wia15": 2}, "dtw": {"n": 1546, "kab": 38, "aktif": 743, "berizin": 332, "rating": 4.46, "alam": 604, "buatan": 533, "budaya": 408}, "dw2025": {"total": 734, "aktif": 488, "tutup": 246, "rintisan": 463, "berkembang": 189, "maju": 73, "mandiri": 9, "pokdarwis": 1886, "umkm": 313, "homestay": 95}, "kalwis": [[10, 10], [7, 94], [13, 70], [16, 93], [20, 122], [43, 197], [24, 214], [34, 235], [16, 210], [28, 230], [20, 20], [5, 5]], "ken": [["Festival Rujak Uleg", "Kota Surabaya", "9 Mei 2026", "2026-05-09", "2026-05-09"], ["Surabaya Vaganza", "Kota Surabaya", "16 Mei 2026", "2026-05-16", "2026-05-16"], ["Festival Nasional Reog Ponorogo", "Kabupaten Ponorogo", "6-15 Juni 2026", "2026-06-06", "2026-06-15"], ["Segoro Topeng Kaliwungu", "Kabupaten Lumajang", "27-28 Juni 2026", "2026-06-27", "2026-06-28"], ["Festival Ronthek", "Kabupaten Pacitan", "17-19 Juli 2026", "2026-07-17", "2026-07-19"], ["Banyuwangi Ethno Carnival", "Kabupaten Banyuwangi", "17-19 Juli 2026", "2026-07-17", "2026-07-19"], ["Jember Fashion Carnaval", "Kabupaten Jember", "24-26 Juli 2026", "2026-07-24", "2026-07-26"], ["Tong Tong Night Market", "Kota Malang", "30 Juli – 2 Agustus 2026", "2026-07-30", "2026-08-02"], ["Festival Jaranan Trenggalek Terbuka", "Kabupaten Trenggalek", "21-27 September 2026", "2026-09-21", "2026-09-27"], ["Festival Musik Tong Tong", "Kabupaten Sumenep", "17-18 Oktober 2026", "2026-10-17", "2026-10-18"], ["Gandrung Sewu", "Kabupaten Banyuwangi", "22-24 Oktober 2026", "2026-10-22", "2026-10-24"]], "agenda": {"total": 194, "hari_ini": 2, "pekan": 3, "mendatang": 8, "belum_disposisi": 0, "per_bulan": [0, 2, 0, 12, 30, 45, 14, 20, 23, 43, 5, 0], "dekat": [{"mulai": "2026-10-22", "selesai": "2026-10-24", "judul": "Permohonan Dukungan & Fasilitasi Studi Tiru Penguatan Daya Tarik Destinasi Pariwisata Unggulan (22–24 Okt 2026) – Dinas Pariwisata Prov. Kalimantan Selatan", "jam": "Seharian", "lokasi": "Makam Sunan Ampel (Surabaya); Makam Sunan Giri & Sunan Gresik (Kab. Gresik)", "disposisi": "Yunita"}, {"mulai": "2026-10-24", "selesai": "2026-10-27", "judul": "Pra-Revalidasi Gunung Sewu UNESCO Global Geopark (24–27 Okt)", "jam": "Seharian", "lokasi": "Kawasan Gunung Sewu UGGp (Gunungkidul–Wonogiri–Pacitan), lokasi sesuai lampiran", "disposisi": "Dyah Sukma"}]}, "kunjungan": {"bulan": [{"b": 1, "wisnus": 8552811, "wisman": 27052, "lapor": 38, "lengkap": true, "w25": 7853447}, {"b": 2, "wisnus": 5152942, "wisman": 28514, "lapor": 38, "lengkap": true, "w25": 6337193}, {"b": 3, "wisnus": 6890641, "wisman": 21059, "lapor": 38, "lengkap": true, "w25": 2500370}, {"b": 4, "wisnus": 6883952, "wisman": 38605, "lapor": 38, "lengkap": true, "w25": 8754020}, {"b": 5, "wisnus": 8256660, "wisman": 57123, "lapor": 38, "lengkap": true, "w25": 7280064}, {"b": 6, "wisnus": 7717895, "wisman": 48590, "lapor": 36, "lengkap": true, "w25": 7356532}, {"b": 7, "wisnus": 6658706, "wisman": 59071, "lapor": 33, "lengkap": false, "w25": 8191349}, {"b": 8, "wisnus": 4563052, "wisman": 61771, "lapor": 30, "lengkap": false, "w25": 5553331}, {"b": 9, "wisnus": 1854809, "wisman": 26040, "lapor": 19, "lengkap": false, "w25": 6456923}, {"b": 10, "wisnus": 0, "wisman": 0, "lapor": 0, "lengkap": false, "w25": 6403039}, {"b": 11, "wisnus": 0, "wisman": 0, "lapor": 0, "lengkap": false, "w25": 6539336}, {"b": 12, "wisnus": 0, "wisman": 0, "lapor": 0, "lengkap": false, "w25": 9086380}], "kab_total": 38, "wisnus": 56531468, "wisman": 367825, "bulan_akhir": 9, "bulan_lengkap": 6, "tumbuh": 0.08416013362332153}, "dw2026": {"total": 907, "aktif": 503, "tutup_sementara": 269, "tutup_permanen": 135, "rintisan": 623, "berkembang": 201, "maju": 74, "mandiri": 9}, "diperbarui": "2026-10-24T10:57:38+07:00", "hari_ini": "2026-10-24"};
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const BLN = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const nf = new Intl.NumberFormat('id-ID');
+  const cp = new Intl.NumberFormat('id-ID', { notation: 'compact', maximumFractionDigits: 1 });
+  const dec = (n, k) => Number(n).toLocaleString('id-ID', { minimumFractionDigits: k, maximumFractionDigits: k });
+  const set = (id, t) => { const el = $(id); if (el) el.textContent = t; };
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const todayJkt = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+
+  const upd = new Date(D.diperbarui);
+  const stamp = 'Diperbarui ' + upd.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB';
+  set('stamp', 'Ringkasan kinerja dan data destinasi pariwisata Jawa Timur. ' + stamp + '.');
+  set('foot-upd', stamp + '. Halaman ini diperbarui otomatis tiga kali sehari: pukul 06.00, 14.00 dan 22.00 WIB.');
+
+  function bars(box, items, max) {
+    box.textContent = '';
+    const mx = max || Math.max(1, ...items.map((d) => d.v));
+    items.forEach((d) => {
+      const r = document.createElement('div'); r.className = 'bar';
+      const l = document.createElement('span'); l.textContent = d.label;
+      const t = document.createElement('span'); t.className = 't';
+      const b = document.createElement('i'); b.style.width = Math.max(0, d.v / mx * 100) + '%'; b.style.background = d.color; t.appendChild(b);
+      const v = document.createElement('span'); v.className = 'r'; v.textContent = d.text;
+      r.append(l, t, v); box.appendChild(r);
+    });
+  }
+  function stack(bar, leg, items) {
+    const tot = items.reduce((s, d) => s + d.v, 0) || 1;
+    items.forEach((d) => {
+      const i = document.createElement('i'); i.style.width = (d.v / tot * 100) + '%'; i.style.background = d.color; bar.appendChild(i);
+      const s = document.createElement('span'); const b = document.createElement('b'); b.style.background = d.color;
+      s.append(b, document.createTextNode(d.label + ' ' + nf.format(d.v) + ' (' + dec(d.v / tot * 100, 1) + '%)')); leg.appendChild(s);
+    });
+  }
+  // Grafik batang bulanan: bars = [{m, main, mainColor, inner?, innerColor?, line?}], tipFn(d)
+  function monthly(box, rows, opt) {
+    box.textContent = '';
+    const W = Math.max(300, box.clientWidth || 520), H = opt.h || 170, mL = 40, mR = 8, mT = 8, mB = 22;
+    const max = Math.max(1, ...rows.map((d) => Math.max(d.main || 0, d.inner || 0, d.line || 0)));
+    const step = Math.pow(10, Math.floor(Math.log10(max))); const top = Math.ceil(max / step) * step;
+    const y = (v) => H - mB - (v / top) * (H - mT - mB);
+    const bw = (W - mL - mR) / 12, pad = bw * 0.22;
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': opt.label }, box);
+    for (let i = 0; i <= 4; i++) { const v = top * i / 4; el('line', { x1: mL, x2: W - mR, y1: y(v), y2: y(v), stroke: css('--grid') }, svg);
+      const t = el('text', { x: mL - 6, y: y(v) + 3, 'text-anchor': 'end' }, svg); t.textContent = opt.fmt(v); }
+    rows.forEach((d, i) => {
+      const x = mL + i * bw;
+      const t = el('text', { x: x + bw / 2, y: H - 6, 'text-anchor': 'middle' }, svg); t.textContent = BLN[i];
+      if (d.main > 0) el('rect', { x: x + pad, width: bw - 2 * pad, y: y(d.main), height: y(0) - y(d.main), rx: 3, fill: d.mainColor }, svg);
+      if (d.inner > 0) { const iw = (bw - 2 * pad) * 0.45; el('rect', { x: x + (bw - iw) / 2, width: iw, y: y(d.inner), height: y(0) - y(d.inner), rx: 2, fill: d.innerColor }, svg); }
+    });
+    const pts = rows.map((d, i) => d.line != null ? [mL + i * bw + bw / 2, y(d.line)] : null).filter(Boolean);
+    if (pts.length) {
+      el('path', { d: 'M' + pts.map((p) => p.join(',')).join('L'), fill: 'none', stroke: css('--c2'), 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+      pts.forEach((p) => el('circle', { cx: p[0], cy: p[1], r: 2.5, fill: css('--c2') }, svg));
+    }
+    const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true; box.appendChild(tip);
+    rows.forEach((d, i) => {
+      const hit = el('rect', { x: mL + i * bw, width: bw, y: mT, height: H - mT - mB, fill: 'transparent' }, svg);
+      hit.addEventListener('mousemove', (ev) => {
+        tip.textContent = ''; opt.tip(d, i).forEach((line, j) => { const e = document.createElement('div'); if (j === 0) e.className = 'h'; e.textContent = line; tip.appendChild(e); });
+        tip.hidden = false; const b = box.getBoundingClientRect(); let lx = ev.clientX - b.left + 12;
+        if (lx + tip.offsetWidth > b.width) lx = ev.clientX - b.left - tip.offsetWidth - 12;
+        tip.style.left = Math.max(0, lx) + 'px'; tip.style.top = Math.max(0, ev.clientY - b.top - 24) + 'px';
+      });
+      hit.addEventListener('mouseleave', () => { tip.hidden = true; });
+    });
+  }
+
+  function draw() {
+    // Agenda
+    const A = D.agenda;
+    set('ag-hari', nf.format(A.hari_ini)); set('ag-pekan', nf.format(A.pekan)); set('ag-up', nf.format(A.mendatang)); set('ag-tot', nf.format(A.total));
+    const np = $('ag-nopic'); np.textContent = A.belum_disposisi ? nf.format(A.belum_disposisi) + ' belum didisposisi' : 'semua sudah didisposisi'; np.className = 'n' + (A.belum_disposisi ? ' warn' : '');
+    const curM = Number(D.hari_ini.slice(5, 7));
+    monthly($('ag-chart'), A.per_bulan.map((v, i) => ({ main: v, mainColor: i + 1 === curM ? css('--c1') : css('--muted-bar') })),
+      { h: 150, label: 'Agenda per bulan', fmt: (v) => nf.format(v), tip: (d, i) => [BULAN[i], nf.format(d.main) + ' agenda'] });
+    const hariIni = todayJkt();
+    const besokD = new Date(hariIni + 'T00:00:00Z'); besokD.setUTCDate(besokD.getUTCDate() + 1);
+    const besok = besokD.toISOString().slice(0, 10);
+    const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const label = (iso) => { const d = new Date(iso + 'T00:00:00Z'); return HARI[d.getUTCDay()] + ', ' + d.getUTCDate() + ' ' + BULAN[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); };
+    const fillDay = (listId, headId, title, iso) => {
+      set(headId, title + ' · ' + label(iso));
+      const ul = $(listId); ul.textContent = '';
+      const items = (A.dekat || []).filter((r) => r.mulai <= iso && r.selesai >= iso);
+      if (!items.length) { const p = document.createElement('li'); p.className = 'note'; p.style.padding = '6px 0'; p.textContent = 'Tidak ada agenda tercatat.'; ul.appendChild(p); return; }
+      items.forEach((r) => {
+        const li = document.createElement('li'); li.className = 'li'; li.style.gridTemplateColumns = '5.2rem 1fr';
+        const jm = document.createElement('div'); jm.className = 'dt'; jm.style.padding = '4px 6px'; jm.style.fontSize = '12px';
+        jm.textContent = r.jam && r.jam !== '-' ? r.jam.replace(/\s*WIB.*$/i, '').replace(/\s*–\s*selesai/i, '') : (r.mulai !== r.selesai ? 'Beberapa hari' : '–');
+        const body = document.createElement('div');
+        const tt = document.createElement('div'); tt.className = 'tt'; tt.textContent = r.judul || '(tanpa judul)';
+        const mt = document.createElement('div'); mt.className = 'mt';
+        if (r.disposisi) { const p = document.createElement('span'); p.className = 'pill'; p.textContent = r.disposisi; mt.appendChild(p); }
+        if (r.lokasi) { const x = document.createElement('span'); x.textContent = r.lokasi; mt.appendChild(x); }
+        if (r.mulai !== r.selesai) { const x = document.createElement('span'); x.textContent = 's.d. ' + label(r.selesai); mt.appendChild(x); }
+        body.append(tt, mt); li.append(jm, body); ul.appendChild(li);
+      });
+    };
+    fillDay('ag-l1', 'ag-h1', 'Hari ini', hariIni);
+    fillDay('ag-l2', 'ag-h2', 'Besok', besok);
+
+    // Geopark
+    const G = D.geopark;
+    set('gp-uggp', String(G.tahap[0][1])); set('gp-proses', String(G.tahap.slice(1).reduce((t, r) => t + r[1], 0)));
+    const GC = [css('--ok'), css('--c3'), css('--c2'), css('--accent2'), css('--c4'), css('--muted-bar')];
+    bars($('gp-tahap'), G.tahap.map(([l, v], i) => ({ label: l, v, text: String(v), color: GC[i] })));
+    const gl = $('gp-list'); gl.textContent = ''; const tg = todayJkt();
+    G.update.forEach((e) => {
+      const st = e[4] < tg ? 'selesai' : e[3] <= tg ? 'berlangsung' : 'mendatang';
+      const li = document.createElement('li'); li.className = 'li';
+      const dt = document.createElement('div'); dt.className = 'dt' + (st === 'berlangsung' ? ' now' : '');
+      const dd = document.createElement('div'); dd.className = 'd'; dd.textContent = String(Number(e[3].slice(8, 10)));
+      const mm = document.createElement('div'); mm.className = 'm'; mm.textContent = BLN[Number(e[3].slice(5, 7)) - 1];
+      dt.append(dd, mm);
+      const body = document.createElement('div');
+      const tt = document.createElement('div'); tt.className = 'tt'; tt.textContent = e[0];
+      const mt = document.createElement('div'); mt.className = 'mt';
+      if (st === 'berlangsung') { const p = document.createElement('span'); p.className = 'pill now'; p.textContent = 'Sedang berlangsung'; mt.appendChild(p); }
+      const a = document.createElement('span'); a.textContent = e[1]; const b = document.createElement('span'); b.textContent = e[2];
+      mt.append(a, b); body.append(tt, mt); li.append(dt, body); gl.appendChild(li);
+    });
+
+    // IPKN
+    const I = D.ipkn;
+    set('ip-skor', dec(I.skor_2026, 3)); set('ip-skor24', '2024: ' + dec(I.skor_2024, 3));
+    set('ip-rank', String(I.rank_2026)); set('ip-n', 'dari ' + I.n + ' provinsi');
+    bars($('ip-traj'), [['2022', I.rank_2022], ['2024', I.rank_2024], ['2026', I.rank_2026]].map(([y, r], i) => ({ label: 'Peringkat ' + y, v: I.n + 1 - r, text: 'ke-' + r, color: i === 2 ? css('--c1') : css('--muted-bar') })), I.n);
+    $('ip-kelas').textContent = 'Kelas daya saing: ' + I.kelas + ' · ' + (I.jarak > 0 ? '+' : '') + dec(I.jarak, 3) + ' di atas skor nasional';
+
+    // IMTI
+    const M = D.imti;
+    set('im-skor', dec(M.skor, 2)); set('im-rank', String(M.peringkat)); set('im-rank25', '2025: ' + M.peringkat_2025 + ' · dari ' + M.n + ' provinsi');
+    const ch = $('im-chg'); ch.textContent = (M.perubahan > 0 ? '▲ +' : M.perubahan < 0 ? '▼ ' : '') + dec(M.perubahan, 1) + ' poin vs 2025'; ch.className = 'n ' + (M.perubahan >= 0 ? 'up' : 'down');
+    bars($('im-aces'), M.pilar.map(([l, v, r]) => ({ label: l, v, text: dec(v, 1) + ' · #' + r, color: css('--c3') })), 100);
+
+    // Capaian
+    const C = D.capaian;
+    set('cp-pr', nf.format(C.berprestasi)); set('cp-tot', 'dari ' + nf.format(C.total) + ' desa'); set('cp-mm', nf.format(C.maju_mandiri)); set('cp-adwi', nf.format(C.adwi)); set('cp-wia', nf.format(C.wia15));
+
+    // Kunjungan
+    const K = D.kunjungan;
+    set('kj-l1', 'Wisnus Jan–' + BLN[Math.max(0, K.bulan_akhir - 1)] + ' 2026'); set('kj-wn', cp.format(K.wisnus)); set('kj-wm', cp.format(K.wisman));
+    const g = $('kj-g');
+    if (K.tumbuh == null) { g.textContent = '–'; } else { g.textContent = (K.tumbuh > 0 ? '+' : '') + dec(K.tumbuh * 100, 1) + '%'; g.className = 'v ' + (K.tumbuh >= 0 ? 'up' : 'down'); }
+    set('kj-gn', K.bulan_lengkap ? 'Jan–' + BLN[K.bulan_lengkap - 1] + ', bulan dengan ≥90% kab/kota melapor' : 'belum ada bulan lengkap');
+    monthly($('kj-chart'), K.bulan.map((d) => ({ main: d.wisnus, mainColor: d.lengkap ? css('--c1') : css('--muted-bar'), line: d.w25 })),
+      { label: 'Wisnus per bulan 2026 dibanding 2025', fmt: (v) => cp.format(v),
+        tip: (d, i) => { const r = K.bulan[i]; return [BULAN[i] + (r.lapor ? ' · ' + r.lapor + '/' + K.kab_total + ' kab/kota melapor' : ''), '2026: ' + (r.wisnus ? nf.format(r.wisnus) : 'belum ada'), '2025: ' + nf.format(r.w25)]; } });
+
+    // DTW
+    const T = D.dtw;
+    set('dt-n', nf.format(T.n)); set('dt-kab', 'di ' + T.kab + ' kab/kota'); set('dt-aktif', nf.format(T.aktif)); set('dt-izin', nf.format(T.berizin)); set('dt-rt', dec(T.rating, 2));
+    bars($('dt-kat'), [['Alam', T.alam, '--c1'], ['Buatan', T.buatan, '--c2'], ['Budaya', T.budaya, '--c3']].map(([l, v, c]) => ({ label: 'DTW ' + l, v, text: nf.format(v) + ' (' + dec(v / T.n * 100, 0) + '%)', color: css(c) })));
+
+    // Desa wisata
+    const KC = [css('--c4'), css('--c2'), css('--c1'), css('--c3')];
+    const W5 = D.dw2025, W6 = D.dw2026;
+    set('d5-tot', nf.format(W5.total)); set('d5-aktif', nf.format(W5.aktif)); set('d5-tutup', nf.format(W5.tutup));
+    $('d5-stack').textContent = ''; $('d5-leg').textContent = '';
+    stack($('d5-stack'), $('d5-leg'), [['Rintisan', W5.rintisan], ['Berkembang', W5.berkembang], ['Maju', W5.maju], ['Mandiri', W5.mandiri]].map(([l, v], i) => ({ label: l, v, color: KC[i] })));
+    set('d5-eko', nf.format(W5.pokdarwis) + ' anggota Pokdarwis · ' + nf.format(W5.umkm) + ' UMKM · ' + nf.format(W5.homestay) + ' homestay');
+    set('d6-tot', nf.format(W6.total)); set('d6-aktif', nf.format(W6.aktif)); set('d6-ts', nf.format(W6.tutup_sementara)); set('d6-tp', nf.format(W6.tutup_permanen));
+    $('d6-stack').textContent = ''; $('d6-leg').textContent = '';
+    stack($('d6-stack'), $('d6-leg'), [['Rintisan', W6.rintisan], ['Berkembang', W6.berkembang], ['Maju', W6.maju], ['Mandiri', W6.mandiri]].map(([l, v], i) => ({ label: l, v, color: KC[i] })));
+
+    // Kalender
+    const tot = D.kalwis.reduce((s, r) => [s[0] + r[0], s[1] + r[1]], [0, 0]);
+    set('kw-masuk', nf.format(tot[0])); set('kw-upd', nf.format(tot[1])); set('kw-ken', String(D.ken.length));
+    monthly($('kw-chart'), D.kalwis.map((r) => ({ main: r[1], mainColor: css('--muted-bar'), inner: r[0], innerColor: css('--c1') })),
+      { h: 150, label: 'Event per bulan', fmt: (v) => nf.format(v), tip: (d, i) => [BULAN[i], 'Update event: ' + nf.format(d.main), 'Masuk Kalwis: ' + nf.format(d.inner)] });
+    const today = todayJkt();
+    const st = (e) => e[4] < today ? 'Selesai' : e[3] <= today ? 'Sedang berlangsung' : 'Mendatang';
+    const cnt = {}; D.ken.forEach((e) => { cnt[st(e)] = (cnt[st(e)] || 0) + 1; });
+    set('kw-st', ['Selesai', 'Sedang berlangsung', 'Mendatang'].filter((k) => cnt[k]).map((k) => cnt[k] + ' ' + k.toLowerCase()).join(' · '));
+    const list = $('kw-list'); list.textContent = '';
+    D.ken.slice().sort((a, b) => b[3].localeCompare(a[3])).forEach((e) => {
+      const s = st(e);
+      const li = document.createElement('li'); li.className = 'li' + (s === 'Selesai' ? ' done' : '');
+      const dt = document.createElement('div'); dt.className = 'dt' + (s === 'Sedang berlangsung' ? ' now' : '');
+      const dd = document.createElement('div'); dd.className = 'd'; dd.textContent = String(Number(e[3].slice(8, 10)));
+      const mm = document.createElement('div'); mm.className = 'm'; mm.textContent = BLN[Number(e[3].slice(5, 7)) - 1];
+      dt.append(dd, mm);
+      const body = document.createElement('div');
+      const tt = document.createElement('div'); tt.className = 'tt'; tt.textContent = e[0];
+      const mt = document.createElement('div'); mt.className = 'mt';
+      const p = document.createElement('span'); p.className = 'pill' + (s === 'Sedang berlangsung' ? ' now' : ''); p.textContent = s;
+      const a = document.createElement('span'); a.textContent = e[1]; const b = document.createElement('span'); b.textContent = e[2];
+      mt.append(p, a, b); body.append(tt, mt); li.append(dt, body); list.appendChild(li);
+    });
+    // Tim
+    const TM = D.tim;
+    set('tm-n', String(TM.length));
+    set('tm-lp', TM.filter((r) => r[3] === 'Laki-laki').length + ' / ' + TM.filter((r) => r[3] === 'Perempuan').length);
+    bars($('tm-status'), [['PNS', 'PNS', '--c1'], ['PPPK', 'PPPK', '--c3'], ['PPPK Paruh Waktu', 'PPPK-PW', '--c2']].map(([l, k, c]) => { const v = TM.filter((r) => r[4] === k).length; return { label: l, v, text: String(v), color: css(c) }; }), TM.length);
+    const td = todayJkt(), ty = Number(td.slice(0, 4)), tmn = Number(td.slice(5, 7)), t0 = Date.UTC(ty, tmn - 1, Number(td.slice(8, 10)));
+    set('tm-ultah', String(TM.filter((r) => r[1] === tmn).length)); set('tm-ultah-n', BULAN[tmn - 1]);
+    const nx = TM.map((r) => { let d = Date.UTC(ty, r[1] - 1, r[2]); if (d < t0) d = Date.UTC(ty + 1, r[1] - 1, r[2]); return { r, hari: Math.round((d - t0) / 86400000) }; }).sort((a, b) => a.hari - b.hari);
+    const tl = $('tm-list'); tl.textContent = '';
+    nx.slice(0, 6).forEach(({ r, hari }) => {
+      const li = document.createElement('li'); li.className = 'li';
+      const dt = document.createElement('div'); dt.className = 'dt' + (hari === 0 ? ' now' : '');
+      const dd = document.createElement('div'); dd.className = 'd'; dd.textContent = String(r[2]);
+      const mm = document.createElement('div'); mm.className = 'm'; mm.textContent = BLN[r[1] - 1];
+      dt.append(dd, mm);
+      const body = document.createElement('div');
+      const tt = document.createElement('div'); tt.className = 'tt'; tt.textContent = r[0];
+      const mt = document.createElement('div'); mt.className = 'mt';
+      const p = document.createElement('span'); p.className = 'pill' + (hari === 0 ? ' now' : ''); p.textContent = hari === 0 ? '🎂 Hari ini' : hari === 1 ? 'Besok' : hari + ' hari lagi';
+      const j = document.createElement('span'); j.textContent = r[5];
+      mt.append(p, j); body.append(tt, mt); li.append(dt, body); tl.appendChild(li);
+    });
+  }
+  draw();
+  let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(draw, 150); });
+  try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw); } catch (e) {}
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>
+
+</body>
+</html>
